@@ -1,30 +1,13 @@
-<!doctype html>
+<?php require_once '../../private/initialize.php'; ?>
 
-<html lang="en">
-    <head>
-        <title>GBI</title>
-        <meta charset="utf-8">
-        <link rel="stylesheet" media="all" href="../stylesheets/staff.css" />
-    </head>
-
-    <body>
-        <header>
-            <h1>GBI Staff Area</h1>
-
-        </header>
-        <nav>
-            <ul>
-                <li><a href="index.php">Menu</a></li>
-            </ul>
-
-        </nav>
-        <div id="content">
-            
-        </div>
-        <footer>
-            &copy; <?php echo date('Y'); ?> Globe Bank
-
-        </footer>
-
-    </body>
-</html>
+<?php $page_title = 'Staff Menu'; ?>
+<?php include SHARED_PATH . '/staff_header.php'; ?>
+<div id="content">
+    <div id="main-menu">
+        <h2>Main Menu</h2>
+        <ul>
+            <li><a href="subjects/index.php"/>Subjects</li>
+        </ul>
+    </div>
+</div>
+<?php include SHARED_PATH . '/staff_footer.php'; ?>

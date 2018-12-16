@@ -7,7 +7,7 @@
 
 <html lang="en">
 <head>
-    <title>GBI - <?= $page_title; ?></title>
+    <title>GBI - <?= h($page_title); ?></title>
     <meta charset="utf-8">
     <link rel="stylesheet" media="all" href="<?= url_for('/stylesheets/staff.css');?>" />
 </head>

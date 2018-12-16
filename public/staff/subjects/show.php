@@ -4,10 +4,17 @@
 
 $id = $_GET['id'] ?? '1'; // PHP > 7.0
 
-echo $id;
-
 ?>
 
-<a href="show.php?name=<?php echo u('John Doe'); ?>">Link</a><br />
-<a href="show.php?company=<?php echo u('Widgets&More'); ?>">Link</a><br />
-<a href="show.php?query=<?php echo u('!#*?'); ?>">Link</a><br />
+<?php $page_title = "Show Subject"; ?>
+<?php include SHARED_PATH .'/staff_header.php'; ?>
+
+<div id="content">
+    <a class="back-link" href="<?= url_for('/staff/subjects/index.php');?>">&laquo; Back to List</a>
+
+    <div class="subject show">
+        Subject ID: <?= h($id); ?>
+    </div>
+</div>
+
+<?php include SHARED_PATH . '/staff_footer.php'; ?>

@@ -15,3 +15,7 @@ function raw_u($string="") {
     return rawurlencode($string);
 }
 
+function h($string="") {
+    return htmlspecialchars($string);
+}
+

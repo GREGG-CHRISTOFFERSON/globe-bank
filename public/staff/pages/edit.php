@@ -2,16 +2,18 @@
 
 require_once '../../../private/initialize.php';
 
-// initialize form values to empty strings
+if (!isset($_GET['id'])) {
+    redirect_to(url_for('/staff/pages/index.php'));
+}
 
+$id = $_GET['id'];
 $menu_name = '';
 $position = '';
 $visible = '';
 
-// if form was submitted, display form parameters
-if(is_post_request()) {
 
-    // Handle form values sent by new.php page
+if(is_post_request()) {
+    // Handle form values sent by form on this page
 
     $menu_name = $_POST['menu_name'] ?? '';
     $position = $_POST['position'] ?? '';
@@ -25,20 +27,20 @@ if(is_post_request()) {
 
 ?>
 
-<?php $page_title = 'Create Subject'; ?>
+<?php $page_title = 'Edit Page'; ?>
 <?php include(SHARED_PATH . '/staff_header.php'); ?>
 
 <div id="content">
 
-    <a class="back-link" href="<?php echo url_for('/staff/subjects/index.php'); ?>">&laquo; Back to List</a>
+    <a class="back-link" href="<?php echo url_for('/staff/pages/index.php'); ?>">&laquo; Back to List</a>
 
-    <div class="subject new">
-        <h1>Create Subject</h1>
+    <div class="subject edit">
+        <h1>Edit Page</h1>
 
-        <form action="<?= url_for('/staff/subjects/new.php') ?>" method="post">
+        <form action="<?php echo url_for('/staff/pages/edit.php?id=' . h(u($id))); ?>" method="post">
             <dl>
                 <dt>Menu Name</dt>
-                <dd><input type="text" name="menu_name" value="<?= h($menu_name) ?>" /></dd>
+                <dd><input type="text" name="menu_name" value="<?= h($menu_name); ?>" /></dd>
             </dl>
             <dl>
                 <dt>Position</dt>
@@ -46,7 +48,7 @@ if(is_post_request()) {
                     <select name="position">
                         <option value="1"<?php if ($position == "1") {
                             echo " selected";
-                        }?>>1</option>
+                        } ?>>1</option>
                     </select>
                 </dd>
             </dl>
@@ -60,7 +62,7 @@ if(is_post_request()) {
                 </dd>
             </dl>
             <div id="operations">
-                <input type="submit" value="Create Subject" />
+                <input type="submit" value="Edit Subject" />
             </div>
         </form>
 

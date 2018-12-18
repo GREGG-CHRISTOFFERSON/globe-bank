@@ -1,14 +1,7 @@
 <!--TODO: add links to new.php and edit.php. In the link to edit.php, editing requires a page ID-->
 <?php require_once '../../../private/initialize.php'; ?>
 
-<?php
-$pages = [
-    ['id' => '1', 'position' => '1', 'visible' => '1', 'menu_name' => 'Globe Bank'],
-    ['id' => '2', 'position' => '1', 'visible' => '1', 'menu_name' => 'History'],
-    ['id' => '3', 'position' => '1', 'visible' => '1', 'menu_name' => 'Leadership'],
-    ['id' => '4', 'position' => '1', 'visible' => '1', 'menu_name' => 'Contact Us'],
-];
-?>
+<?php $page_set = find_all_pages(); ?>
 
 <?php $page_title = 'Pages'; ?>
 <?php include SHARED_PATH . '/staff_header.php'; ?>
@@ -31,7 +24,7 @@ $pages = [
                 <th>&nbsp;</th>
             </tr>
 
-            <?php foreach($pages as $page) { ?>
+            <?php while($page = mysqli_fetch_assoc($page_set)) { ?>
                 <tr>
                     <td><?php echo h($page['id']); ?></td>
                     <td><?php echo h($page['position']); ?></td>
@@ -43,6 +36,9 @@ $pages = [
                 </tr>
             <?php } ?>
         </table>
+        <?php
+        mysqli_free_result($page_set);
+        ?>
     </div>
 </div>
 <?php include SHARED_PATH . '/staff_footer.php'; ?>

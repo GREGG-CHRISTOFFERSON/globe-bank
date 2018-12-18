@@ -1,4 +1,3 @@
-<!--TODO: add links to new.php and edit.php. In the link to edit.php, editing requires a page ID-->
 <?php require_once '../../../private/initialize.php'; ?>
 
 <?php $page_set = find_all_pages(); ?>
@@ -16,6 +15,7 @@
         <table class="list">
             <tr>
                 <th>ID</th>
+                <th>Subject ID</th>
                 <th>Position</th>
                 <th>Visible</th>
                 <th>Name</th>
@@ -27,6 +27,7 @@
             <?php while($page = mysqli_fetch_assoc($page_set)) { ?>
                 <tr>
                     <td><?php echo h($page['id']); ?></td>
+                    <td><?php echo h($page['subject_id']); ?></td>
                     <td><?php echo h($page['position']); ?></td>
                     <td><?php echo $page['visible'] == 1 ? 'true' : 'false'; ?></td>
                     <td><?php echo h($page['menu_name']); ?></td>

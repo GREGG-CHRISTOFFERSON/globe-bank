@@ -17,71 +17,23 @@ if(is_post_request()) {
 
 ?>
 
-<?php $page_title = 'Edit Page'; ?>
+<?php $page_title = 'Delete Page'; ?>
 <?php include(SHARED_PATH . '/staff_header.php'); ?>
 
 <div id="content">
+  <a class="back-link" href="<?= url_for('/staff/pages/index.php'); ?>">&laquo; Back to List</a>
 
-    <a class="back-link" href="<?php echo url_for('/staff/pages/index.php'); ?>">&laquo; Back to List</a>
+  <div class="page delete">
+    <h1>Delete Page</h1>
+    <p>Are you sure you want to delete this page?</p>
+    <p class="item"><?= h($page['menu_name']); ?></p>
 
-    <div class="subject edit">
-        <h1>Edit Page</h1>
-
-        <form action="<?php echo url_for('/staff/pages/edit.php?id=' . h(u($id))); ?>" method="post">
-          <dl>
-            <dt>Subject</dt>
-            <dd>
-              <select name="subject_id">
-                  <?php
-                  $subject_set = find_all_subjects();
-                  while ($subject = mysqli_fetch_assoc($subject_set)) {
-                      echo "<option value=\"" . h($subject['id']) . "\"";
-                      if ($page['subject_id'] == $subject['id']) {
-                          echo " selected";
-                      }
-                      echo ">" . h($subject['menu_name']) . "</option>";
-                  }
-                  mysqli_free_result($subject_set);
-                  ?>
-              </select>
-            </dd>
-          </dl>
-            <dl>
-                <dt>Menu Name</dt>
-                <dd><input type="text" name="menu_name" value="<?= h($page['menu_name']); ?>" /></dd>
-            </dl>
-            <dl>
-                <dt>Position</dt>
-                <dd>
-                  <select name="position">
-                      <?php
-                      for ($i=1; $i <= $page_count; $i++) {
-                          echo "<option value=\"{$i}\"";
-                          if ($page["position"] == $i) {
-                              echo " selected";
-                          }
-                          echo ">{$i}</option>";
-                      }
-                      ?>
-                  </select>
-                </dd>
-            </dl>
-            <dl>
-                <dt>Visible</dt>
-                <dd>
-                    <input type="hidden" name="visible" value="0" />
-                    <input type="checkbox" name="visible" value="1"<?php if ($page['visible'] == "1") {
-                        echo " checked";
-                    } ?>/>
-                </dd>
-            </dl>
-            <div id="operations">
-                <input type="submit" value="Edit Subject" />
-            </div>
-        </form>
-
-    </div>
-
+    <form action="<?= url_for('/staff/pages/delete.php?id=' . h(u($page['id']))); ?>" method="post">
+      <div id="operations">
+        <input type="submit" name="commit" value="Delete Page" />
+      </div>
+    </form>
+  </div>
 </div>
 
 <?php include(SHARED_PATH . '/staff_footer.php'); ?>

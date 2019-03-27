@@ -25,9 +25,14 @@ if(is_post_request()) {
     $subject['visible'] = $_POST['visible'] ?? '';
 
     $result = insert_subject($subject);
-
-    $new_id = mysqli_insert_id($db);
-    redirect_to(url_for('/staff/subjects/show.php?id=' . $new_id));
+    if ($result === true) {
+        $new_id = mysqli_insert_id($db);
+        redirect_to(url_for('/staff/subjects/show.php?id=' . $new_id));
+    } else {
+      $errors = $result;
+    }
+} else {
+  // display the blank form
 }
 
 ?>
@@ -42,7 +47,8 @@ if(is_post_request()) {
     <div class="subject new">
         <h1>Create Subject</h1>
 
-        <form action="<?= url_for('/staff/subjects/new.php') ?>" method="post">
+      <?=display_errors($errors); ?>
+      <form action="<?= url_for('/staff/subjects/new.php') ?>" method="post">
             <dl>
                 <dt>Menu Name</dt>
                 <dd><input type="text" name="menu_name" value="<?= h($menu_name) ?>" /></dd>

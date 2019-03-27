@@ -5,7 +5,7 @@
 
 // Credentials
 $dbhost = '192.168.10.10';
-$dbuser = 'globe_bank';
+$dbuser = 'homestead';
 $dbpass = 'secret';
 $dbname = 'globe_bank';
 

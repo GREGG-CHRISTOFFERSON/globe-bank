@@ -347,6 +347,7 @@ function find_admin_by_username($username) {
 function validate_admin($admin, $options=[]) {
 
     $password_required = $options['password_required'] ?? true;
+    $super_admin = $options['super_admin'] ?? false;
     $errors = [];
 
     // first_name
@@ -442,9 +443,10 @@ function insert_admin($admin) {
 function update_admin($admin) {
     global $db;
 
+    $super_admin = $admin['username'] == 'johndoe1';
     $password_sent = !is_blank($admin['password']);
 
-    $errors = validate_admin($admin, ['password_required' => $password_sent]);
+    $errors = validate_admin($admin, ['password_required' => $password_sent, 'super_admin' => $super_admin]);
     if (!empty($errors)) {
         return $errors;
     }

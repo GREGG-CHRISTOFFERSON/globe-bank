@@ -1,5 +1,7 @@
 <?php
     if (!isset($page_title)) { $page_title = 'Staff Area'; }
+    $messages = $_SESSION['messages'] ?? '';
+    unset($_SESSION['messages']);
 ?>
 
 
@@ -19,7 +21,10 @@
 </header>
 <nav>
     <ul>
+        <li>User: <?= $_SESSION['username'] ?? ''; ?></li>
         <li><a href="<?= url_for('/staff/index.php');?>">Menu</a></li>
+        <li><a href="<?= url_for('/staff/logout.php');?>">Logout</a></li>
     </ul>
 
 </nav>
+<?=display_status_messages($messages); ?>

@@ -50,7 +50,7 @@ function has_length_exactly($value, $exact) {
 // * spaces count towards length
 // * use trim() if spaces should not count
 function has_length($value, $options) {
-    if (isset($options['min']) && !has_length_greater_than($value, $options['min'] + 1)) {
+    if (isset($options['min']) && !has_length_greater_than($value, $options['min'] - 1)) {
         return false;
     } elseif (isset($options['max']) && !has_length_less_than($value, $options['max'] + 1)) {
         return false;
@@ -110,5 +110,48 @@ function has_unique_page_menu_name($menu_name, $current_id="0") {
     mysqli_free_result($page_set);
 
     return $page_count === 0;
+}
+
+// has_unique_username('username49')
+// * Validates uniqueness of admins.username
+// * For new records, provide only the username
+// * For existing records, provide current ID as second argument
+//   has_unique_username('username49', 4)
+function has_unique_username($username, $current_id="0") {
+    global $db;
+
+    $sql = "SELECT * FROM admins ";
+    $sql .= "WHERE username='" . db_escape($db, $username) . "' ";
+    $sql .= "AND id != '" . db_escape($db, $current_id) . "'";
+
+    $admin_set = mysqli_query($db, $sql);
+    $admin_count = mysqli_num_rows($admin_set);
+    mysqli_free_result($admin_set);
+
+    return $admin_count === 0;
+}
+
+// has_uppercase('Abcdefg')
+// * Validates string contains uppercase character
+function has_uppercase($value) {
+    return preg_match('/[A-Z]/', $value) === 1;
+}
+
+// has_lowercase('aBCDEFG')
+// * Validates string contains lowercase character
+function has_lowercase($value) {
+    return preg_match('/[a-z]/', $value) === 1;
+}
+
+// has_number('username49')
+// * Validates string contains number
+function has_number($value) {
+    return preg_match('/[0-9]/', $value) === 1;
+}
+
+// has_symbol('username49!')
+// * Validates string contains a symbol
+function has_symbol($value) {
+    return preg_match('/[^A-Za-z0-9\s]/', $value) === 1;
 }
 

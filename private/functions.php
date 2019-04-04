@@ -56,3 +56,17 @@ function display_errors($errors=array()) {
     }
     return $output;
 }
+
+function display_status_messages($messages=array()) {
+    $output = '';
+    if(!empty($messages)) {
+        $output .= "<div class=\"messages\">";
+        $output .= "<ul>";
+        foreach($messages as $message) {
+            $output .= "<li>" . h($message) . "</li>";
+        }
+        $output .= "</ul>";
+        $output .= "</div>";
+    }
+    return $output;
+}

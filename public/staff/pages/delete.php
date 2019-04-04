@@ -10,6 +10,11 @@ $id = $_GET['id'];
 
 if(is_post_request()) {
    $result = delete_page($id);
+
+    // store message
+    $messages[] = "The page was deleted successfully";
+    $_SESSION['messages'] = $messages;
+
    redirect_to(url_for('/staff/pages/index.php'));
 } else {
   $page = find_page_by_id($id);

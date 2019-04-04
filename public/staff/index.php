@@ -8,6 +8,7 @@
         <ul>
             <li><a href="<?= url_for('/staff/subjects/index.php'); ?>"/>Subjects</li>
             <li><a href="<?= url_for('/staff/pages/index.php'); ?>"/>Pages</li>
+            <li><a href="<?= url_for('/staff/admins/index.php'); ?>"/>Admins</li>
         </ul>
     </div>
 </div>

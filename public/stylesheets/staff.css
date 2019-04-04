@@ -116,7 +116,7 @@ dd {
 
 /* Errors */
 
-.errors {
+.errors, .messages {
   display: inline-block;
   border: 2px solid red;
   color: red;
@@ -124,7 +124,17 @@ dd {
   margin-bottom: 1em;
 }
 
-.errors ul {
+.messages {
+  border: 2px solid green;
+  color: green;
+  margin-left: 1em;
+}
+
+.errors ul, .messages ul {
   margin-bottom: 0;
   padding-left: 1em;
+}
+
+.messages ul {
+  margin-top: 0;
 }

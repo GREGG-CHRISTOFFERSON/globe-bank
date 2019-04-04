@@ -18,8 +18,27 @@ if (is_post_request()) {
         $errors[] = "Password cannot be blank.";
     }
 
-    log_in_admin($admin);
-    redirect_to(url_for('/staff/index.php'));
+    // if there were no errors, try to login
+    if (empty($errors)) {
+        // using one variable ensures message is the same
+        $login_failure_msg = "Log in was unsuccessful";
+        $admin = find_admin_by_username($username);
+        if ($admin) {
+           if (password_verify($password, $admin['hashed_password'])) {
+               // password matches
+               log_in_admin($admin);
+               redirect_to(url_for('/staff/index.php'));
+           } else {
+               // username found, but password doesn't match
+               $errors[] = $login_failure_msg;
+           }
+
+        } else {
+            // no username found
+            $errors[] = $login_failure_msg;
+        }
+
+    }
 }
 
 ?>

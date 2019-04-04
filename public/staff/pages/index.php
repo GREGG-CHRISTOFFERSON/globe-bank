@@ -1,6 +1,9 @@
 <?php require_once '../../../private/initialize.php'; ?>
 
-<?php $page_set = find_all_pages(); ?>
+<?php
+    require_login();
+    $page_set = find_all_pages();
+?>
 
 <?php $page_title = 'Pages'; ?>
 <?php include SHARED_PATH . '/staff_header.php'; ?>

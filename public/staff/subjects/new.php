@@ -1,6 +1,7 @@
 <?php
 
 require_once '../../../private/initialize.php';
+require_login();
 
 // initialize form values to empty strings
 

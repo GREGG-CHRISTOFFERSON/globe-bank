@@ -331,6 +331,19 @@ function find_admin_by_id($id) {
     return $admin; // returns an assoc. array
 }
 
+function find_admin_by_username($username) {
+
+    global $db;
+
+    $sql = "SELECT * FROM admins ";
+    $sql .= "WHERE username='" . db_escape($db, $username) . "' ";
+    $result = mysqli_query($db, $sql);
+    confirm_result_set($result);
+    $admin = mysqli_fetch_assoc($result);
+    mysqli_free_result($result);
+    return $admin; // returns an assoc. array
+}
+
 function validate_admin($admin) {
     $errors = [];
 

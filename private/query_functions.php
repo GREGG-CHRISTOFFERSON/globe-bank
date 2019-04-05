@@ -103,6 +103,7 @@ function insert_subject($subject)
 function update_subject($subject)
 {
     global $db;
+    $start_pos = $subject['position'];
 
     $errors = validate_subject($subject);
     if (!empty($errors)) {
@@ -119,6 +120,12 @@ function update_subject($subject)
     $result = mysqli_query($db, $sql);
     // For UPDATE statements, $result is true/false
     if ($result) {
+
+        // shift position -1 from items between start and end_pos (including $end_pos)
+        $subject = find_subject_by_id($subject['id']);
+        $end_pos = $subject['position'];
+        shift_subject_positions($start_pos, $end_pos, $subject['id']);
+
         return true;
     } else {
         // UPDATE failed
@@ -161,15 +168,18 @@ function shift_subject_positions($start_pos, $end_pos, $current_id = 0)
     if ($start_pos == 0) {
         // new item, +1 to items greater than $end_pos
         $sql .= "SET position = position + 1" . "', ";
-        $sql .= "WHERE position >" . $end_pos . "', ";
+        $sql .= "WHERE position > " . $end_pos . "', ";
 
     } elseif ($end_pos == 0) {
         // delete item, -1 from items greater than $start_pos
         $sql .= "SET position = position - 1" . "', ";
-        $sql .= "WHERE position >" . $start_pos . "', ";
+        $sql .= "WHERE position > " . $start_pos . "', ";
 
     } elseif ($start_pos < $end_pos) {
         // move later, -1 from items between (including $end_pos)
+        $sql .= "SET position = position - 1" . "', ";
+        $sql .= "WHERE position > " . $start_pos . "', ";
+        $sql .= "AND position <= " . $end_pos . "', ";
 
     } elseif ($start_pos > $end_pos) {
         // move earlier, +1 to items between (including $end_pos)

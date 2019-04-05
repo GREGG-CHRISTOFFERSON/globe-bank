@@ -101,10 +101,10 @@ function insert_subject($subject)
     }
 }
 
-function update_subject($subject)
+function update_subject($subject, $options=[])
 {
     global $db;
-    $start_pos = $subject['position'];
+    $start_pos = $options['start_pos'];
 
     $errors = validate_subject($subject);
     if (!empty($errors)) {
@@ -123,7 +123,6 @@ function update_subject($subject)
     if ($result) {
 
         // shift position from items between start and end_pos (including $end_pos)
-        $subject = find_subject_by_id($subject['id']);
         $end_pos = $subject['position'];
         shift_subject_positions($start_pos, $end_pos, $subject['id']);
 
@@ -176,20 +175,19 @@ function shift_subject_positions($start_pos, $end_pos, $current_id = 0)
         $sql .= "SET position = position - 1 ";
         $sql .= "WHERE position > '" . $start_pos . "' ";
 
+    } elseif ($start_pos < $end_pos) {
+        // move later, -1 from items between (including $end_pos)
+        $sql .= "SET position = position - 1 ";
+        $sql .= "WHERE position > '" . $start_pos . "' ";
+        $sql .= "AND position <= '" . $end_pos . "' ";
+
+    } elseif ($start_pos > $end_pos) {
+        // move earlier, +1 to items between (including $end_pos)
+        $sql .= "SET position = position + 1 ";
+        $sql .= "WHERE position >= '" . $end_pos . "' ";
+        $sql .= "AND position < '" . $start_pos . "' ";
+
     }
-//    elseif ($start_pos < $end_pos) {
-//        // move later, -1 from items between (including $end_pos)
-//        $sql .= "SET position = position - 1" . "', ";
-//        $sql .= "WHERE position > " . $start_pos . "', ";
-//        $sql .= "AND position <= " . $end_pos . "', ";
-//
-//    } elseif ($start_pos > $end_pos) {
-//        // move earlier, +1 to items between (including $end_pos)
-//        $sql .= "SET position = position + 1" . "', ";
-//        $sql .= "WHERE position >= " . $end_pos . "', ";
-//        $sql .= "AND position <= " . $start_pos . "', ";
-//
-//    }
     // Exclude the current_id in the SQL WHERE clause
     $sql .= "AND id != '" . $current_id . "'";
 

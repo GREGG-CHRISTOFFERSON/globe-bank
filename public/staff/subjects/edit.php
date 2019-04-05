@@ -8,7 +8,8 @@ if (!isset($_GET['id'])) {
 }
 
 $id = $_GET['id'];
-
+$subject = find_subject_by_id($id);
+$start_pos = $subject['position'];
 
 if(is_post_request()) {
     // Handle form values sent by edit.php
@@ -19,7 +20,7 @@ if(is_post_request()) {
     $subject['position'] = $_POST['position'] ?? '';
     $subject['visible'] = $_POST['visible'] ?? '';
 
-    $result = update_subject($subject);
+    $result = update_subject($subject, ['start_pos' => $start_pos]);
     if ($result === true) {
 
         // store message
@@ -29,12 +30,8 @@ if(is_post_request()) {
         redirect_to(url_for('/staff/subjects/show.php?id=' . $id));
     } else {
       $errors = $result;
-//      var_dump($errors);
     }
 
-
-} else {
-    $subject = find_subject_by_id($id);
 }
 
 $subject_set = find_all_subjects();

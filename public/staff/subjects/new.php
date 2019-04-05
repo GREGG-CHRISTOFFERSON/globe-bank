@@ -2,9 +2,6 @@
 
 require_once '../../../private/initialize.php';
 require_login();
-if ($_SESSION['sql']) {
-    echo $_SESSION['sql'];
-}
 
 // initialize form values to empty strings
 

@@ -89,6 +89,7 @@ function insert_subject($subject)
 
         // shift subject positions +1 to items greater than $subject['position']
         $new_id = mysqli_insert_id($db);
+        $_SESSION['new_id'] = $new_id;
         shift_subject_positions(0, $subject['position'], $new_id);
 
         return true;
@@ -193,6 +194,7 @@ function shift_subject_positions($start_pos, $end_pos, $current_id = 0)
     $sql .= "AND id != '" . $current_id . "'";
 
     $result = mysqli_query($db, $sql);
+
     // For UPDATE statements, $result is true/false
     if ($result) {
         return true;

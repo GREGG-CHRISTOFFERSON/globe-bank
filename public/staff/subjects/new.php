@@ -2,6 +2,9 @@
 
 require_once '../../../private/initialize.php';
 require_login();
+if ($_SESSION['sql']) {
+    echo $_SESSION['sql'];
+}
 
 // initialize form values to empty strings
 
@@ -27,7 +30,8 @@ if(is_post_request()) {
 
     $result = insert_subject($subject);
     if ($result === true) {
-        $new_id = mysqli_insert_id($db);
+        $new_id = $_SESSION['new_id'] ?? 0;
+        unset($_SESSION['new_id']);
 
         // store message
         $messages[] = "The subject was created successfully";

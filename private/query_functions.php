@@ -164,14 +164,16 @@ function delete_subject($id)
 function shift_subject_positions($start_pos, $end_pos, $current_id = 0)
 {
     global $db;
-    $sql = "UPDATE subjects SET ";
+    $sql = "UPDATE subjects ";
     if ($start_pos == 0) {
         // new item, +1 to items greater than $end_pos
-        $sql .= "SET position = position + 1" . "', ";
-        $sql .= "WHERE position > " . $end_pos . "', ";
+        var_dump($start_pos, $end_pos, $current_id);
+        $sql .= "SET position = position + 1 ";
+        $sql .= "WHERE position >= '" . $end_pos . "' ";
 
     } elseif ($end_pos == 0) {
         // delete item, -1 from items greater than $start_pos
+        var_dump($start_pos, $end_pos, $current_id);
         $sql .= "SET position = position - 1" . "', ";
         $sql .= "WHERE position > " . $start_pos . "', ";
 
@@ -189,7 +191,7 @@ function shift_subject_positions($start_pos, $end_pos, $current_id = 0)
 
     }
     // Exclude the current_id in the SQL WHERE clause
-    $sql .= "AND id != " . $current_id;
+    $sql .= "AND id != '" . $current_id . "'";
 
     $result = mysqli_query($db, $sql);
     // For UPDATE statements, $result is true/false

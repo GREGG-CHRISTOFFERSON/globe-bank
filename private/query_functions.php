@@ -2,7 +2,8 @@
 
 // Subjects
 
-function find_all_subjects($options=[]) {
+function find_all_subjects($options = [])
+{
     global $db;
 
     $visible = $options['visible'] ?? false;
@@ -17,7 +18,8 @@ function find_all_subjects($options=[]) {
     return $result;
 }
 
-function find_subject_by_id($id, $options=[]) {
+function find_subject_by_id($id, $options = [])
+{
     global $db;
 
     $visible = $options['visible'] ?? false;
@@ -33,38 +35,40 @@ function find_subject_by_id($id, $options=[]) {
     return $subject; // returns an assoc. array
 }
 
-function validate_subject($subject) {
+function validate_subject($subject)
+{
 
     $errors = [];
 
     // menu_name
-    if(is_blank($subject['menu_name'])) {
+    if (is_blank($subject['menu_name'])) {
         $errors[] = "Name cannot be blank.";
-    } elseif(!has_length($subject['menu_name'], ['min' => 2, 'max' => 255])) {
+    } elseif (!has_length($subject['menu_name'], ['min' => 2, 'max' => 255])) {
         $errors[] = "Name must be between 2 and 255 characters.";
     }
 
     // position
     // Make sure we are working with an integer
-    $postion_int = (int) $subject['position'];
-    if($postion_int <= 0) {
+    $postion_int = (int)$subject['position'];
+    if ($postion_int <= 0) {
         $errors[] = "Position must be greater than zero.";
     }
-    if($postion_int > 999) {
+    if ($postion_int > 999) {
         $errors[] = "Position must be less than 999.";
     }
 
     // visible
     // Make sure we are working with a string
-    $visible_str = (string) $subject['visible'];
-    if(!has_inclusion_of($visible_str, ["0","1"])) {
+    $visible_str = (string)$subject['visible'];
+    if (!has_inclusion_of($visible_str, ["0", "1"])) {
         $errors[] = "Visible must be true or false.";
     }
 
     return $errors;
 }
 
-function insert_subject($subject) {
+function insert_subject($subject)
+{
     global $db;
 
     $errors = validate_subject($subject);
@@ -82,8 +86,10 @@ function insert_subject($subject) {
     $result = mysqli_query($db, $sql);
     // For INSERT statements, $result is true/false
     if ($result) {
+
         // shift subject positions +1 to items greater than $subject['position']
-//        shift_subject_positions(0, $subject['position']);
+        $new_id = mysqli_insert_id($db);
+        shift_subject_positions(0, $subject['position'], $new_id);
 
         return true;
     } else {
@@ -94,7 +100,8 @@ function insert_subject($subject) {
     }
 }
 
-function update_subject($subject) {
+function update_subject($subject)
+{
     global $db;
 
     $errors = validate_subject($subject);
@@ -121,55 +128,101 @@ function update_subject($subject) {
     }
 }
 
-function delete_subject($id) {
-  global $db;
+function delete_subject($id)
+{
+    global $db;
 
-  $sql = "DELETE FROM subjects ";
-  $sql .= "WHERE id='" . db_escape($db, $id) ."' ";
-  $sql .= "LIMIT 1";
-  $result = mysqli_query($db, $sql);
+    $sql = "DELETE FROM subjects ";
+    $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
+    $sql .= "LIMIT 1";
+    $result = mysqli_query($db, $sql);
 
-  // For DELETE statements, $result is true/false
-  if($result) {
-    return true;
-  } else {
-    // DELETE failed
-    echo mysqli_error($db);
-    db_disconnect($db);
-    exit;
-  }
+    // For DELETE statements, $result is true/false
+    if ($result) {
+
+        // shift subject positions -1 from items greater than $start_pos
+        $subject = find_subject_by_id($id);
+        $start_pos = $subject['position'];
+        shift_subject_positions($start_pos, 0, $id);
+
+        return true;
+    } else {
+        // DELETE failed
+        echo mysqli_error($db);
+        db_disconnect($db);
+        exit;
+    }
+}
+
+function shift_subject_positions($start_pos, $end_pos, $current_id = 0)
+{
+    global $db;
+    $sql = "UPDATE subjects SET ";
+    if ($start_pos == 0) {
+        // new item, +1 to items greater than $end_pos
+        $sql .= "SET position = position + 1" . "', ";
+        $sql .= "WHERE position >" . $end_pos . "', ";
+
+    } elseif ($end_pos == 0) {
+        // delete item, -1 from items greater than $start_pos
+        $sql .= "SET position = position - 1" . "', ";
+        $sql .= "WHERE position >" . $start_pos . "', ";
+
+    } elseif ($start_pos < $end_pos) {
+        // move later, -1 from items between (including $end_pos)
+
+    } elseif ($start_pos > $end_pos) {
+        // move earlier, +1 to items between (including $end_pos)
+
+    }
+    // Exclude the current_id in the SQL WHERE clause
+    $sql .= "AND id != " . $current_id;
+
+    $result = mysqli_query($db, $sql);
+    // For UPDATE statements, $result is true/false
+    if ($result) {
+        return true;
+    } else {
+        // UPDATE failed
+        echo mysqli_error($db);
+        db_disconnect($db);
+        exit;
+    }
 }
 
 // Pages
 
-function find_all_pages() {
-  global $db;
+function find_all_pages()
+{
+    global $db;
 
-  $sql = "SELECT * FROM pages ";
-  $sql .= "ORDER BY subject_id ASC, position ASC";
-  $result = mysqli_query($db, $sql);
-  confirm_result_set($result);
-  return $result;
+    $sql = "SELECT * FROM pages ";
+    $sql .= "ORDER BY subject_id ASC, position ASC";
+    $result = mysqli_query($db, $sql);
+    confirm_result_set($result);
+    return $result;
 }
 
-function find_page_by_id($id, $options=[]) {
+function find_page_by_id($id, $options = [])
+{
 
-  global $db;
+    global $db;
 
-  $visible = $options['visible'] ?? false;
-  $sql = "SELECT * FROM pages ";
-  $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
-  if ($visible) {
-      $sql .= "AND visible = true";
-  }
-  $result = mysqli_query($db, $sql);
-  confirm_result_set($result);
-  $page = mysqli_fetch_assoc($result);
-  mysqli_free_result($result);
-  return $page; // returns an assoc. array
+    $visible = $options['visible'] ?? false;
+    $sql = "SELECT * FROM pages ";
+    $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
+    if ($visible) {
+        $sql .= "AND visible = true";
+    }
+    $result = mysqli_query($db, $sql);
+    confirm_result_set($result);
+    $page = mysqli_fetch_assoc($result);
+    mysqli_free_result($result);
+    return $page; // returns an assoc. array
 }
 
-function validate_page($page) {
+function validate_page($page)
+{
     $errors = [];
 
     // subject_id
@@ -178,7 +231,7 @@ function validate_page($page) {
     }
 
     // menu_name
-    if(is_blank($page['menu_name'])) {
+    if (is_blank($page['menu_name'])) {
         $errors[] = "Name cannot be blank.";
     } elseif (!has_length($page['menu_name'], ['min' => 2, 'max' => 255])) {
         $errors[] = "Name must be between 2 and 255 characters.";
@@ -190,7 +243,7 @@ function validate_page($page) {
 
     // position
     // Make sure we are working with an integer
-    $position_int = (int) $page['position'];
+    $position_int = (int)$page['position'];
     if ($position_int <= 0) {
         $errors[] = "Position must be greater than zero.";
     }
@@ -200,7 +253,7 @@ function validate_page($page) {
 
     // visible
     // Make sure we are working with a string
-    $visible_str = (string) $page['visible'];
+    $visible_str = (string)$page['visible'];
     if (!has_inclusion_of($visible_str, ["0", "1"])) {
         $errors[] = "Visible must be true or false.";
     }
@@ -213,86 +266,90 @@ function validate_page($page) {
     return $errors;
 }
 
-function insert_page($page) {
+function insert_page($page)
+{
 
-  global $db;
-
-  $errors = validate_page($page);
-  if (!empty($errors)) {
-      return $errors;
-  }
-
-  $sql = "INSERT INTO pages ";
-  $sql .= "(subject_id, menu_name, position, visible, content) ";
-  $sql .= "VALUES (";
-  $sql .= "'" . db_escape($db, $page['subject_id']) . "',";
-  $sql .= "'" . db_escape($db, $page['menu_name']) . "',";
-  $sql .= "'" . db_escape($db, $page['position']) . "',";
-  $sql .= "'" . db_escape($db, $page['visible']) . "',";
-  $sql .= "'" . db_escape($db, $page['content']) . "'";
-  $sql .= ")";
-  $result = mysqli_query($db, $sql);
-  // For INSERT statements, $result is true/false
-  if($result) {
-    return true;
-  } else {
-    // INSERT failed
-    echo mysqli_error($db);
-    db_disconnect($db);
-    exit;
-  }
-}
-
-function update_page($page) {
-  global $db;
+    global $db;
 
     $errors = validate_page($page);
     if (!empty($errors)) {
         return $errors;
     }
 
-  $sql = "UPDATE pages SET ";
-  $sql .= "subject_id='" . db_escape($db, $page['subject_id']) . "', ";
-  $sql .= "menu_name='" . db_escape($db, $page['menu_name']) . "', ";
-  $sql .= "position='" . db_escape($db, $page['position']) . "', ";
-  $sql .= "visible='" . db_escape($db, $page['visible']) . "', ";
-  $sql .= "content='" . db_escape($db, $page['content']) . "' ";
-  $sql .= "WHERE id='" . db_escape($db, $page['id']) . "' ";
-  $sql .= "LIMIT 1";
+    $sql = "INSERT INTO pages ";
+    $sql .= "(subject_id, menu_name, position, visible, content) ";
+    $sql .= "VALUES (";
+    $sql .= "'" . db_escape($db, $page['subject_id']) . "',";
+    $sql .= "'" . db_escape($db, $page['menu_name']) . "',";
+    $sql .= "'" . db_escape($db, $page['position']) . "',";
+    $sql .= "'" . db_escape($db, $page['visible']) . "',";
+    $sql .= "'" . db_escape($db, $page['content']) . "'";
+    $sql .= ")";
+    $result = mysqli_query($db, $sql);
+    // For INSERT statements, $result is true/false
+    if ($result) {
+        return true;
+    } else {
+        // INSERT failed
+        echo mysqli_error($db);
+        db_disconnect($db);
+        exit;
+    }
+}
 
-  $result = mysqli_query($db, $sql);
-  // For UPDATE statements, $result is true/false
-  if($result) {
-    return true;
-  } else {
-    // UPDATE failed
-    echo mysqli_error($db);
-    db_disconnect($db);
-    exit;
-  }
+function update_page($page)
+{
+    global $db;
+
+    $errors = validate_page($page);
+    if (!empty($errors)) {
+        return $errors;
+    }
+
+    $sql = "UPDATE pages SET ";
+    $sql .= "subject_id='" . db_escape($db, $page['subject_id']) . "', ";
+    $sql .= "menu_name='" . db_escape($db, $page['menu_name']) . "', ";
+    $sql .= "position='" . db_escape($db, $page['position']) . "', ";
+    $sql .= "visible='" . db_escape($db, $page['visible']) . "', ";
+    $sql .= "content='" . db_escape($db, $page['content']) . "' ";
+    $sql .= "WHERE id='" . db_escape($db, $page['id']) . "' ";
+    $sql .= "LIMIT 1";
+
+    $result = mysqli_query($db, $sql);
+    // For UPDATE statements, $result is true/false
+    if ($result) {
+        return true;
+    } else {
+        // UPDATE failed
+        echo mysqli_error($db);
+        db_disconnect($db);
+        exit;
+    }
 
 }
 
-function delete_page($id) {
-  global $db;
+function delete_page($id)
+{
+    global $db;
 
-  $sql = "DELETE FROM pages ";
-  $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
-  $sql .= "LIMIT 1";
-  $result = mysqli_query($db, $sql);
+    $sql = "DELETE FROM pages ";
+    $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
+    $sql .= "LIMIT 1";
+    $result = mysqli_query($db, $sql);
 
-  // For DELETE statements, $result is true/false
-  if($result) {
-    return true;
-  } else {
-    // DELETE failed
-    echo mysqli_error($db);
-    db_disconnect($db);
-    exit;
-  }
+    // For DELETE statements, $result is true/false
+    if ($result) {
+        return true;
+    } else {
+        // DELETE failed
+        echo mysqli_error($db);
+        db_disconnect($db);
+        exit;
+    }
 }
 
-function find_pages_by_subject_id($subject_id, $options=[]) {
+function find_pages_by_subject_id($subject_id, $options = [])
+{
 
     global $db;
 
@@ -309,7 +366,8 @@ function find_pages_by_subject_id($subject_id, $options=[]) {
     return $result;
 }
 
-function count_pages_by_subject_id($subject_id, $options=[]) {
+function count_pages_by_subject_id($subject_id, $options = [])
+{
 
     global $db;
 
@@ -331,7 +389,8 @@ function count_pages_by_subject_id($subject_id, $options=[]) {
 
 // Admins
 
-function find_all_admins() {
+function find_all_admins()
+{
     global $db;
 
     $sql = "SELECT * FROM admins ";
@@ -341,7 +400,8 @@ function find_all_admins() {
     return $result;
 }
 
-function find_admin_by_id($id) {
+function find_admin_by_id($id)
+{
 
     global $db;
 
@@ -354,7 +414,8 @@ function find_admin_by_id($id) {
     return $admin; // returns an assoc. array
 }
 
-function find_admin_by_username($username) {
+function find_admin_by_username($username)
+{
 
     global $db;
 
@@ -367,7 +428,8 @@ function find_admin_by_username($username) {
     return $admin; // returns an assoc. array
 }
 
-function validate_admin($admin, $options=[]) {
+function validate_admin($admin, $options = [])
+{
 
     $errors = [];
     $password_required = $options['password_required'] ?? true;
@@ -387,7 +449,7 @@ function validate_admin($admin, $options=[]) {
     }
 
     // email
-    if(is_blank($admin['email'])) {
+    if (is_blank($admin['email'])) {
         $errors[] = "Email cannot be blank.";
     } elseif (!has_valid_email_format($admin['email'])) {
         $errors[] = "Email format invalid.";
@@ -397,7 +459,7 @@ function validate_admin($admin, $options=[]) {
 
     // unique username
     $current_id = $admin['id'] ?? '0';
-    if(is_blank($admin['username'])) {
+    if (is_blank($admin['username'])) {
         $errors[] = "Username cannot be blank.";
     } elseif (!has_length($admin['username'], ['min' => 8, 'max' => 255])) {
         $errors[] = "Username name must be between 8 and 255 characters.";
@@ -425,7 +487,7 @@ function validate_admin($admin, $options=[]) {
 
 
         // confirm password
-        if(is_blank($admin['confirm_password'])) {
+        if (is_blank($admin['confirm_password'])) {
             $errors[] = "Confirm password cannot be blank.";
         } elseif ($admin['password'] !== $admin['confirm_password']) {
             $errors[] = "Passwords do not match.";
@@ -434,7 +496,8 @@ function validate_admin($admin, $options=[]) {
     return $errors;
 }
 
-function insert_admin($admin) {
+function insert_admin($admin)
+{
 
     global $db;
 
@@ -456,7 +519,7 @@ function insert_admin($admin) {
     $sql .= ")";
     $result = mysqli_query($db, $sql);
     // For INSERT statements, $result is true/false
-    if($result) {
+    if ($result) {
         return true;
     } else {
         // INSERT failed
@@ -466,7 +529,8 @@ function insert_admin($admin) {
     }
 }
 
-function update_admin($admin) {
+function update_admin($admin)
+{
     global $db;
 
     $super_admin = $admin['username'] == 'johndoe1';
@@ -492,7 +556,7 @@ function update_admin($admin) {
 
     $result = mysqli_query($db, $sql);
     // For UPDATE statements, $result is true/false
-    if($result) {
+    if ($result) {
         return true;
     } else {
         // UPDATE failed
@@ -503,7 +567,8 @@ function update_admin($admin) {
 
 }
 
-function delete_admin($id) {
+function delete_admin($id)
+{
     global $db;
 
     if ($id != '5') {
@@ -513,7 +578,7 @@ function delete_admin($id) {
         $result = mysqli_query($db, $sql);
 
         // For DELETE statements, $result is true/false
-        if($result) {
+        if ($result) {
             return true;
         } else {
             // DELETE failed
@@ -525,28 +590,6 @@ function delete_admin($id) {
         return false;
     }
 
-}
-
-// Update Positions
-
-function shift_subject_positions($start_pos, $end_pos, $current_id=0) {
-    global $db;
-    $sql = "UPDATE subjects SET ";
-    if ($start_pos == 0) {
-        // new item, +1 to items greater than $end_pos
-        $sql .= "SET position = position" . "', ";
-
-    } elseif ($end_pos == 0) {
-        // delete item, -1 from items greater than $start_pos
-
-    } elseif ($start_pos < $end_pos) {
-        // move later, -1 from items between (including $end_pos)
-
-    } elseif ($start_pos > $end_pos) {
-        // move earlier, +1 to items between (including $end_pos)
-
-    }
-    // Exclude the current_id in the SQL WHERE clause
 }
 
 

@@ -121,7 +121,7 @@ function update_subject($subject)
     // For UPDATE statements, $result is true/false
     if ($result) {
 
-        // shift position -1 from items between start and end_pos (including $end_pos)
+        // shift position from items between start and end_pos (including $end_pos)
         $subject = find_subject_by_id($subject['id']);
         $end_pos = $subject['position'];
         shift_subject_positions($start_pos, $end_pos, $subject['id']);
@@ -183,6 +183,9 @@ function shift_subject_positions($start_pos, $end_pos, $current_id = 0)
 
     } elseif ($start_pos > $end_pos) {
         // move earlier, +1 to items between (including $end_pos)
+        $sql .= "SET position = position + 1" . "', ";
+        $sql .= "WHERE position >= " . $end_pos . "', ";
+        $sql .= "AND position <= " . $start_pos . "', ";
 
     }
     // Exclude the current_id in the SQL WHERE clause

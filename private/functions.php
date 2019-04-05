@@ -42,11 +42,15 @@ function is_GET_request() {
     return $_SERVER['REQUEST_METHOD'] == 'GET';
 }
 
-function display_errors($errors=array()) {
+function display_errors($errors=array(), $options=[]) {
     $output = '';
     if(!empty($errors)) {
         $output .= "<div class=\"errors\">";
-        $output .= "Please fix the following errors:";
+        if (!$options['deleting']) {
+            $output .= "Please fix the following errors:";
+        } else {
+            $output .= "Sorry:";
+        }
         $output .= "<ul>";
         foreach($errors as $error) {
             $output .= "<li>" . h($error) . "</li>";

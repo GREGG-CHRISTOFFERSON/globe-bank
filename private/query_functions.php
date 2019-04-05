@@ -346,9 +346,12 @@ function find_admin_by_username($username) {
 
 function validate_admin($admin, $options=[]) {
 
+    $errors = [];
     $password_required = $options['password_required'] ?? true;
     $super_admin = $options['super_admin'] ?? false;
-    $errors = [];
+    if ($super_admin) {
+        $errors[] = "This user cannot be modified";
+    }
 
     // first_name
     if (!has_length($admin['first_name'], ['min' => 2, 'max' => 255])) {
@@ -480,20 +483,25 @@ function update_admin($admin) {
 function delete_admin($id) {
     global $db;
 
-    $sql = "DELETE FROM admins ";
-    $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
-    $sql .= "LIMIT 1";
-    $result = mysqli_query($db, $sql);
+    if ($id != '5') {
+        $sql = "DELETE FROM admins ";
+        $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
+        $sql .= "LIMIT 1";
+        $result = mysqli_query($db, $sql);
 
-    // For DELETE statements, $result is true/false
-    if($result) {
-        return true;
+        // For DELETE statements, $result is true/false
+        if($result) {
+            return true;
+        } else {
+            // DELETE failed
+            echo mysqli_error($db);
+            db_disconnect($db);
+            exit;
+        }
     } else {
-        // DELETE failed
-        echo mysqli_error($db);
-        db_disconnect($db);
-        exit;
+        return false;
     }
+
 }
 
 

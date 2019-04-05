@@ -350,6 +350,8 @@ function update_page($page)
 function delete_page($id)
 {
     global $db;
+    $page = find_page_by_id($id);
+    $start_pos = $page['position'];
 
     $sql = "DELETE FROM pages ";
     $sql .= "WHERE id='" . db_escape($db, $id) . "' ";
@@ -358,6 +360,8 @@ function delete_page($id)
 
     // For DELETE statements, $result is true/false
     if ($result) {
+        // shift subject positions -1 from items greater than $start_pos
+        shift_page_positions($start_pos, 0, $page['subject_id'], $id);
         return true;
     } else {
         // DELETE failed
@@ -417,12 +421,13 @@ function shift_page_positions($start_pos, $end_pos, $subject_id, $current_id = 0
         $sql .= "AND subject_id = '" . $subject_id . "' ";
 
     }
-//    elseif ($end_pos == 0) {
-//        // delete item, -1 from items greater than $start_pos
-//        $sql .= "SET position = position - 1 ";
-//        $sql .= "WHERE position > '" . $start_pos . "' ";
-//
-//    } elseif ($start_pos < $end_pos) {
+    elseif ($end_pos == 0) {
+        // delete item, -1 from items greater than $start_pos
+        $sql .= "SET position = position - 1 ";
+        $sql .= "WHERE position > '" . $start_pos . "' ";
+        $sql .= "AND subject_id = '" . $subject_id . "' ";
+    }
+// elseif ($start_pos < $end_pos) {
 //        // move later, -1 from items between (including $end_pos)
 //        $sql .= "SET position = position - 1 ";
 //        $sql .= "WHERE position > '" . $start_pos . "' ";

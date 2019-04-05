@@ -8,17 +8,16 @@ if (!isset($_GET['id'])) {
 }
 
 $id = $_GET['id'];
+$page = find_page_by_id($id);
 
-if(is_post_request()) {
-   $result = delete_page($id);
+if (is_post_request()) {
+    $result = delete_page($id);
 
     // store message
     $messages[] = "The page was deleted successfully";
     $_SESSION['messages'] = $messages;
 
-   redirect_to(url_for('/staff/pages/index.php'));
-} else {
-  $page = find_page_by_id($id);
+    redirect_to(url_for('/staff/subjects/show.php?id=' . h(u($page['subject_id']))));
 }
 
 ?>
@@ -27,19 +26,20 @@ if(is_post_request()) {
 <?php include(SHARED_PATH . '/staff_header.php'); ?>
 
 <div id="content">
-  <a class="back-link" href="<?= url_for('/staff/pages/index.php'); ?>">&laquo; Back to List</a>
+    <a class="back-link" href="<?= url_for('/staff/subjects/show.php?id=' . h(u($page['subject_id']))); ?>">&laquo; Back
+        to Subject Page</a>
 
-  <div class="page delete">
-    <h1>Delete Page</h1>
-    <p>Are you sure you want to delete this page?</p>
-    <p class="item"><?= h($page['menu_name']); ?></p>
+    <div class="page delete">
+        <h1>Delete Page</h1>
+        <p>Are you sure you want to delete this page?</p>
+        <p class="item"><?= h($page['menu_name']); ?></p>
 
-    <form action="<?= url_for('/staff/pages/delete.php?id=' . h(u($page['id']))); ?>" method="post">
-      <div id="operations">
-        <input type="submit" name="commit" value="Delete Page" />
-      </div>
-    </form>
-  </div>
+        <form action="<?= url_for('/staff/pages/delete.php?id=' . h(u($page['id']))); ?>" method="post">
+            <div id="operations">
+                <input type="submit" name="commit" value="Delete Page"/>
+            </div>
+        </form>
+    </div>
 </div>
 
 <?php include(SHARED_PATH . '/staff_footer.php'); ?>

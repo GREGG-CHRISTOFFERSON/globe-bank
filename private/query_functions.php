@@ -82,6 +82,9 @@ function insert_subject($subject) {
     $result = mysqli_query($db, $sql);
     // For INSERT statements, $result is true/false
     if ($result) {
+        // shift subject positions +1 to items greater than $subject['position']
+//        shift_subject_positions(0, $subject['position']);
+
         return true;
     } else {
         // INSERT failed
@@ -306,6 +309,26 @@ function find_pages_by_subject_id($subject_id, $options=[]) {
     return $result;
 }
 
+function count_pages_by_subject_id($subject_id, $options=[]) {
+
+    global $db;
+
+    $visible = $options['visible'] ?? false;
+
+    $sql = "SELECT COUNT(id) FROM pages ";
+    $sql .= "WHERE subject_id='" . db_escape($db, $subject_id) . "' ";
+    if ($visible) {
+        $sql .= "AND visible = true ";
+    }
+    $sql .= "ORDER BY position ASC";
+    $result = mysqli_query($db, $sql);
+    confirm_result_set($result);
+    $row = mysqli_fetch_row($result);
+    mysqli_free_result($result);
+    $count = $row[0];
+    return $count;
+}
+
 // Admins
 
 function find_all_admins() {
@@ -502,6 +525,28 @@ function delete_admin($id) {
         return false;
     }
 
+}
+
+// Update Positions
+
+function shift_subject_positions($start_pos, $end_pos, $current_id=0) {
+    global $db;
+    $sql = "UPDATE subjects SET ";
+    if ($start_pos == 0) {
+        // new item, +1 to items greater than $end_pos
+        $sql .= "SET position = position" . "', ";
+
+    } elseif ($end_pos == 0) {
+        // delete item, -1 from items greater than $start_pos
+
+    } elseif ($start_pos < $end_pos) {
+        // move later, -1 from items between (including $end_pos)
+
+    } elseif ($start_pos > $end_pos) {
+        // move earlier, +1 to items between (including $end_pos)
+
+    }
+    // Exclude the current_id in the SQL WHERE clause
 }
 
 

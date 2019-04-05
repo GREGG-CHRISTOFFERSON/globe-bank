@@ -8,6 +8,8 @@ if (!isset($_GET['id'])) {
 }
 
 $id = $_GET['id'];
+$page = find_page_by_id($id);
+$start_pos = $page['position'];
 
 if(is_post_request()) {
     // Handle form values sent by form
@@ -19,7 +21,7 @@ if(is_post_request()) {
     $page['visible'] = $_POST['visible'] ?? '';
     $page['content'] = $_POST['content'] ?? '';
 
-    $result = update_page($page);
+    $result = update_page($page, ['start_pos' => $start_pos]);
     if ($result === true) {
 
         // store message
@@ -30,9 +32,6 @@ if(is_post_request()) {
     } else {
       $errors = $result;
     }
-
-} else {
-  $page = find_page_by_id($id);
 
 }
 

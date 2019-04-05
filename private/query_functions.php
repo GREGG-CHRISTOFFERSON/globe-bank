@@ -316,9 +316,10 @@ function insert_page($page)
     }
 }
 
-function update_page($page)
+function update_page($page, $options=[])
 {
     global $db;
+    $start_pos = $options['start_pos'];
 
     $errors = validate_page($page);
     if (!empty($errors)) {
@@ -337,6 +338,9 @@ function update_page($page)
     $result = mysqli_query($db, $sql);
     // For UPDATE statements, $result is true/false
     if ($result) {
+        // shift position from items between start and end_pos (including $end_pos)
+        $end_pos = $page['position'];
+        shift_page_positions($start_pos, $end_pos, $page['subject_id'], $page['id']);
         return true;
     } else {
         // UPDATE failed
@@ -420,26 +424,27 @@ function shift_page_positions($start_pos, $end_pos, $subject_id, $current_id = 0
         $sql .= "WHERE position >= '" . $end_pos . "' ";
         $sql .= "AND subject_id = '" . $subject_id . "' ";
 
-    }
-    elseif ($end_pos == 0) {
+    } elseif ($end_pos == 0) {
         // delete item, -1 from items greater than $start_pos
         $sql .= "SET position = position - 1 ";
         $sql .= "WHERE position > '" . $start_pos . "' ";
         $sql .= "AND subject_id = '" . $subject_id . "' ";
+
+    } elseif ($start_pos < $end_pos) {
+        // move later, -1 from items between (including $end_pos)
+        $sql .= "SET position = position - 1 ";
+        $sql .= "WHERE position > '" . $start_pos . "' ";
+        $sql .= "AND position <= '" . $end_pos . "' ";
+        $sql .= "AND subject_id = '" . $subject_id . "' ";
+
+    } elseif ($start_pos > $end_pos) {
+        // move earlier, +1 to items between (including $end_pos)
+        $sql .= "SET position = position + 1 ";
+        $sql .= "WHERE position >= '" . $end_pos . "' ";
+        $sql .= "AND position < '" . $start_pos . "' ";
+        $sql .= "AND subject_id = '" . $subject_id . "' ";
+
     }
-// elseif ($start_pos < $end_pos) {
-//        // move later, -1 from items between (including $end_pos)
-//        $sql .= "SET position = position - 1 ";
-//        $sql .= "WHERE position > '" . $start_pos . "' ";
-//        $sql .= "AND position <= '" . $end_pos . "' ";
-//
-//    } elseif ($start_pos > $end_pos) {
-//        // move earlier, +1 to items between (including $end_pos)
-//        $sql .= "SET position = position + 1 ";
-//        $sql .= "WHERE position >= '" . $end_pos . "' ";
-//        $sql .= "AND position < '" . $start_pos . "' ";
-//
-//    }
     // Exclude the current_id in the SQL WHERE clause
     $sql .= "AND id != '" . $current_id . "'";
 

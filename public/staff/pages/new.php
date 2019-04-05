@@ -14,7 +14,8 @@ if (is_post_request()) {
 
     $result = insert_page($page);
     if ($result === true) {
-        $new_id = mysqli_insert_id($db);
+        $new_id = $_SESSION['new_id'] ?? 0;
+        unset($_SESSION['new_id']);
 
         // store message
         $messages[] = "The page was created successfully";

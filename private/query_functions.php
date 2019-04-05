@@ -302,6 +302,11 @@ function insert_page($page)
     $result = mysqli_query($db, $sql);
     // For INSERT statements, $result is true/false
     if ($result) {
+        // shift subject positions +1 to items greater than $subject['position']
+        $new_id = mysqli_insert_id($db);
+        $_SESSION['new_id'] = $new_id;
+        shift_page_positions(0, $page['position'], $page['subject_id'], $new_id);
+
         return true;
     } else {
         // INSERT failed
@@ -399,6 +404,51 @@ function count_pages_by_subject_id($subject_id, $options = [])
     mysqli_free_result($result);
     $count = $row[0];
     return $count;
+}
+
+function shift_page_positions($start_pos, $end_pos, $subject_id, $current_id = 0)
+{
+    global $db;
+    $sql = "UPDATE pages ";
+    if ($start_pos == 0) {
+        // new item, +1 to items greater than $end_pos
+        $sql .= "SET position = position + 1 ";
+        $sql .= "WHERE position >= '" . $end_pos . "' ";
+        $sql .= "AND subject_id = '" . $subject_id . "' ";
+
+    }
+//    elseif ($end_pos == 0) {
+//        // delete item, -1 from items greater than $start_pos
+//        $sql .= "SET position = position - 1 ";
+//        $sql .= "WHERE position > '" . $start_pos . "' ";
+//
+//    } elseif ($start_pos < $end_pos) {
+//        // move later, -1 from items between (including $end_pos)
+//        $sql .= "SET position = position - 1 ";
+//        $sql .= "WHERE position > '" . $start_pos . "' ";
+//        $sql .= "AND position <= '" . $end_pos . "' ";
+//
+//    } elseif ($start_pos > $end_pos) {
+//        // move earlier, +1 to items between (including $end_pos)
+//        $sql .= "SET position = position + 1 ";
+//        $sql .= "WHERE position >= '" . $end_pos . "' ";
+//        $sql .= "AND position < '" . $start_pos . "' ";
+//
+//    }
+    // Exclude the current_id in the SQL WHERE clause
+    $sql .= "AND id != '" . $current_id . "'";
+
+    $result = mysqli_query($db, $sql);
+
+    // For UPDATE statements, $result is true/false
+    if ($result) {
+        return true;
+    } else {
+        // UPDATE failed
+        echo mysqli_error($db);
+        db_disconnect($db);
+        exit;
+    }
 }
 
 // Admins

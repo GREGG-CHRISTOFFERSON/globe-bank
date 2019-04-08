@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Ajax Quote of the Day</title>
+    <style>
+        #entry {
+            margin: 2em 1em;
+        }
+
+        #quote {
+            margin: 1em;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <label for="entry">Category</label>
+    <select id="entry">
+        <option>Select Category</option>
+    </select>
+</div>
+
+<div id="quote">
+</div>
+
+<script>
+    // They Said So quote API
+    // https://theysaidso.com/#
+    const api = 'http://quotes.rest/qod';
+
+    // get a list of quote categories
+    function getCategories() {
+        let url = api + '/categories.json';
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState < 4) {
+                console.log('status: ' + xhr.status);
+            }
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                outputCategories(xhr.responseText);
+            }
+        };
+        xhr.send();
+    }
+
+    getCategories();
+
+    // add the categories as select options
+    function outputCategories(data) {
+        let target = document.getElementById('entry');
+        const json = JSON.parse(data);
+        const categories = json.contents.categories;
+        for (let key in categories) {
+            if (categories.hasOwnProperty(key)) {
+                let option = document.createElement('option');
+                option.value = key;
+                option.innerHTML = categories[key];
+                target.add(option);
+            }
+        }
+    }
+
+    // add change event listener to the select element
+    document.querySelector('select').addEventListener('change', function (ev) {
+        console.log('Changed', ev.target.value);
+        let category = ev.target.value;
+        getQuote(category);
+    });
+
+    // get the quote for the selected category
+    function getQuote(category) {
+        let url = api + ".json?category=" + category;
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState < 4) {
+                showLoading();
+            }
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                outputQuote(xhr.responseText);
+            }
+            // if there is an error, display it
+            if (xhr.status === 429) {
+                const target = document.getElementById('quote');
+                let response = JSON.parse(xhr.response);
+                target.innerHTML = response.error.message;
+            }
+        };
+        xhr.send();
+    }
+
+    // display the selected quote for the category
+    function outputQuote(data) {
+        const target = document.getElementById('quote');
+        const json = JSON.parse(data);
+        const quote = json.contents.quotes[0].quote;
+        target.innerHTML = quote;
+    }
+
+    // show loading if waiting for server
+    function showLoading() {
+        let target = document.getElementById('quote');
+        target.innerHTML = 'Loading...';
+    }
+
+
+</script>
+
+</body>
+</html>
